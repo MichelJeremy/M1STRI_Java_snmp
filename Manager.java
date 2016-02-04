@@ -11,9 +11,9 @@ public class Manager extends Object{
 	
 	
 	public static void main(String args[]) throws MalformedURLException, RemoteException, NotBoundException {
-		Gestion g = new Gestion();
+		Gestion g = new Gestion();//should be done in Agent (because agent calls method)	
 		RMI_Int_Agent souche=(RMI_Int_Agent) Naming.lookup("rmi://localhost/Agent_connection");
-		String ptest = g.doThings();
+		String ptest = g.doThings(); //same
 		String test = souche.getSelfName();
 		System.out.println("test : "+test);
 		System.out.println("ptest : "+ptest);
