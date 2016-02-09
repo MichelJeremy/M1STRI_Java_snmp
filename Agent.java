@@ -14,12 +14,15 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 
 	private static final long serialVersionUID = 1L;
 	
+	private String name = "Jean";
+	
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
 	//Thread to scan the ports
 	private static PortScannerThread scannerThread;
 	
+	//Class to manage the Arraylists and Hashmaps
 	private static Gestion gestion;
 	
 	public Agent() throws RemoteException {
@@ -29,6 +32,14 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	//Called from the Manager, it is used to get the lists of active ports.
 	public Hashtable<Integer, String> getActivesPorts(){
 		return(gestion.getActivesPorts());
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
+	public void setName(String _name){
+		name = _name;
 	}
 		
 	public static void main(String[] args) throws RemoteException, MalformedURLException, AlreadyBoundException, java.rmi.AlreadyBoundException, NotBoundException  {

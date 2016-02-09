@@ -19,6 +19,14 @@ public class Manager extends Object{
 		
 		RMI_Int_Agent souche=(RMI_Int_Agent) Naming.lookup("rmi://localhost/Agent_connection");
 		
+		//TEST of getting Agent's name
+		System.out.println(souche.getName());
+		
+		//TEST of setting Agent's name
+		souche.setName("Julie");
+		System.out.println(souche.getName());
+		
+		//TEST of getting the Active Ports
 		activePorts = new Hashtable<Integer, String>(souche.getActivesPorts());
 		activePortsEnum = activePorts.keys();
 		
