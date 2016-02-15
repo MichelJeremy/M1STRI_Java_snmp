@@ -35,6 +35,8 @@ public class Manager extends Object{
 			currentPort = activePortsEnum.nextElement();
 			
 			System.out.println("Port " + currentPort + " : " + activePorts.get(currentPort));
-		}		
+		}
+	
+		
 	}
 }
