@@ -8,17 +8,48 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 //Represents an agent that is going to be connected to the manager
 public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 
 	private static final long serialVersionUID = 1L;
-	
+	private static  String agentID = "agent1"; // agent's own ID, should become depreciated quickly
 	private String name = "Jean";
+	
+	//vars for file reader
+	private static BufferedReader br = null;
+	private static String line = "";
 	
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
+	private String[] getCsv(String csvFilePath, String searchItem) {
+		String result[] = null;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(csvFilePath));
+			while ((line = br.readLine()) != null) {
+				result[] = line.split(",");
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	return result;
+	}
+	//Read CSV file to get list of users
+	
 	//Thread to scan the ports
 	private static PortScannerThread scannerThread;
 	
@@ -67,6 +98,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		}
 		
 		Naming.bind("Agent_connection", new Agent());
+		LoadAccounts("/home/etu/M1STRI_Java_snmp/example.csv");
 		
 		gestion = new Gestion(ports, portsTranslation);
 		
