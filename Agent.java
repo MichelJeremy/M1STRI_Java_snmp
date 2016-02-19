@@ -24,15 +24,24 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
 	// searches the item "searchItem" and returns the line's fields
+	// Create a BufferedReader to read the file line by line
+	// If 'SearchItem' is found, return the split line
+	// else, the String "Unknown Item" will be returned in the first field of the array result[] (result[0])
 	private static String[] csvLookup(String csvFilePath, String searchItem) {
 		//vars
 		BufferedReader br = null;
 		String line = "";
 		String result[] = null;
+		boolean match = false;
+		
 		try {
 			br = new BufferedReader(new FileReader(csvFilePath));
 			while ((line = br.readLine()) != null) {
 				result = line.split(",");
+				if (result[0].equals(searchItem)) {
+					match = true;
+					return result;
+				}
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
@@ -46,6 +55,15 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 				e.printStackTrace();
 			}
 		}
+	// if no matches were found, the query is incorrect and thus we :
+	// 1 : empty the fields
+	// 2 : insert "Unknown item in the first field
+	if (match == false) {
+		for (int i=0;i<result.length;i++) {
+			result[i] = "";
+		}
+		result[0] = "Unknown item";
+	}
 	return result;
 	}
 
@@ -98,9 +116,8 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		}
 		
 		Naming.bind("Agent_connection", new Agent());
-		String blbl[] = csvLookup("/home/jeremy/M1STRI_Java_snmp/example.csv", "blbl");
-		System.out.println(blbl[0]+blbl[1]+blbl[2]+blbl[0]);
-		
+		String blbl[] = csvLookup("/home/jeremy/M1STRI_Java_snmp/example.csv", "agent2");
+		System.out.println("Field 1 : "+blbl[0]+"\nField 2 : "+blbl[1]+"\nField 3 : "+blbl[2]+"\nField 4 : "+blbl[3]);
 		gestion = new Gestion(ports, portsTranslation);
 		
 		scannerThread = new PortScannerThread(gestion);
