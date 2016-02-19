@@ -27,30 +27,28 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
-	//Read CSV file to get list of users
-	private static void LoadAccounts(String csvFilePath) {
-		//Format of csv file : "agentName", "userID", "userPassword", "r/rw"
+	private String[] getCsv(String csvFilePath, String searchItem) {
+		String result[] = null;
 		try {
-			br = new BufferedReader(new FileReader(csvFilePath));
+			BufferedReader br = new BufferedReader(new FileReader(csvFilePath));
 			while ((line = br.readLine()) != null) {
-				String result[] = line.split(",");
-				if (result[0].equals("agentID")) {
-					//insert into hashmap so that ids are locally loaded
-				}
+				result[] = line.split(",");
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-				try {
-					br.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			try {
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	return result;
 	}
+	//Read CSV file to get list of users
 	
 	//Thread to scan the ports
 	private static PortScannerThread scannerThread;
