@@ -20,19 +20,19 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	private static  String agentID = "agent1"; // agent's own ID, should become depreciated quickly
 	private String name = "Jean";
 	
-	//vars for file reader
-	private static BufferedReader br = null;
-	private static String line = "";
-	
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
-	private String[] getCsv(String csvFilePath, String searchItem) {
+	// searches the item "searchItem" and returns the line's fields
+	private static String[] csvLookup(String csvFilePath, String searchItem) {
+		//vars
+		BufferedReader br = null;
+		String line = "";
 		String result[] = null;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(csvFilePath));
+			br = new BufferedReader(new FileReader(csvFilePath));
 			while ((line = br.readLine()) != null) {
-				result[] = line.split(",");
+				result = line.split(",");
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
@@ -48,7 +48,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		}
 	return result;
 	}
-	//Read CSV file to get list of users
+
 	
 	//Thread to scan the ports
 	private static PortScannerThread scannerThread;
@@ -98,7 +98,8 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		}
 		
 		Naming.bind("Agent_connection", new Agent());
-		LoadAccounts("/home/etu/M1STRI_Java_snmp/example.csv");
+		String blbl[] = csvLookup("/home/jeremy/M1STRI_Java_snmp/example.csv", "blbl");
+		System.out.println(blbl[0]+blbl[1]+blbl[2]+blbl[0]);
 		
 		gestion = new Gestion(ports, portsTranslation);
 		
