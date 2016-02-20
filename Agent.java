@@ -28,9 +28,10 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 
 	
 	// First we read the initial line and make sure it exists
-	// Then, we buffer the whole file
-	// We modify the line with the new value (set)
-	// Finally, we rewrite the file
+	// Then, we write the content of the original file to the temp file
+	// We modify the line with the new value (set) and write it where the original line was
+	// Finally, remove the original file
+	// The temp file is renamed to the original file's name
 	// returns -1 in case of error, 1 in case of success
 	private static int csvSetValue(String csvFilePath, String OID, String newValue) {
 		// vars
@@ -42,6 +43,11 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		String newline = "";
 		String result[] = null;
 		
+		//file declarations
+		File temp = new File("/home/jeremy/M1STRI_Java_snmp/exampleOID.csv.bkp");
+		File orig = new File(csvFilePath);
+		
+		
 		existenceCheck = csvLookup(csvFilePath, OID);
 		if (existenceCheck[0].equals(OID)) {
 			existence = true;
@@ -50,9 +56,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		}
 		
 		try {
-			File f = new File("/home/jeremy/M1STRI_Java_snmp/exampleOID.csv.bkp");
-			f.createNewFile();
-			
+			temp.createNewFile();
 			br = new BufferedReader(new FileReader(csvFilePath));
 			bw = new BufferedWriter(new FileWriter("/home/jeremy/M1STRI_Java_snmp/exampleOID.csv.bkp"));
 			while ((line = br.readLine()) != null) {
@@ -83,8 +87,14 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 			}
 		}
 		
-		// now swap the files
-		//TODO
+		// now swap the files : remove the original and replace by the new
+		try {
+			orig.delete();
+			temp.renameTo(orig);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
 		return 1;
 	}
 	
@@ -93,7 +103,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	// searches the item "searchItem" and returns the line's fields
 	// Create a BufferedReader to read the file line by line
-	// If 'SearchItem' is found, return the split line
+	// If 'SearchItem' is found, returns the split line
 	// else, the String "Unknown Item" will be returned in the first field of the array result[] (result[0])
 	private static String[] csvLookup(String csvFilePath, String searchItem) {
 		//vars
@@ -179,7 +189,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		String blbl[] = csvLookup("/home/jeremy/M1STRI_Java_snmp/example.csv", "agent2");
 		System.out.println("Field 1 : "+blbl[0]+"\nField 2 : "+blbl[1]+"\nField 3 : "+blbl[2]+"\nField 4 : "+blbl[3]);
 			
-		int vartest = csvSetValue("/home/jeremy/M1STRI_Java_snmp/exampleOID.csv", "1.2.3.4.1","wtfifthatworks");
+		int vartest = csvSetValue("/home/jeremy/M1STRI_Java_snmp/exampleOID.csv", "1.2.3.4.2","it works");
 		System.out.println(vartest);
 		
 		
