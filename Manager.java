@@ -4,6 +4,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Scanner;
+
+import javax.swing.plaf.synth.SynthSeparatorUI;
 
 public class Manager extends Object{
 
@@ -16,6 +19,7 @@ public class Manager extends Object{
 	
 	public static void main(String args[]) throws MalformedURLException, RemoteException, NotBoundException {
 		int currentPort;
+		Scanner reader;
 		
 		RMI_Int_Agent souche=(RMI_Int_Agent) Naming.lookup("rmi://localhost/Agent_connection");
 		
@@ -37,6 +41,32 @@ public class Manager extends Object{
 			System.out.println("Port " + currentPort + " : " + activePorts.get(currentPort));
 		}
 	
+		reader = new Scanner(System.in);
+		System.out.println("Welcome. Choose from the menu below (1-4):\n");
+		System.out.println("1: snmpget");
+		System.out.println("2: snmpget-next");
+		System.out.println("3: snmpset");
+		System.out.println("4: quit");
 		
+		int boucle = 1;
+		while (boucle == 1) {
+			System.out.println("Your choice: ");
+			int choice = reader.nextInt();
+			switch (choice) {
+				case 1: //call snmpget
+						System.out.println("1");
+						break;
+				case 2: //call snmpget-next
+						System.out.println("2");	
+						break;
+				case 3: //call snmpset
+						System.out.println("3");
+						break;
+				case 4: //quit
+						System.out.println("4");
+						boucle = 0;
+				default: System.out.println("We did not understand your choice. Please try again and make sure your choice is correct.");
+			}
+		}
 	}
 }
