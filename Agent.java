@@ -20,9 +20,7 @@ import java.io.IOException;
 public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 
 	private static final long serialVersionUID = 1L;
-	private String name = "agent2";
-	private String user = "blbl2";
-	private String pass = "blbl";
+	private String name = "agent1";
 	
 	
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
@@ -55,19 +53,20 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	//Search the mib for the corresponding information
 	public String[] getMIBInformation(String OID){
-		//Get the project path (help if used on different machines)
-		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("\\src\\MIB.csv");
+		//Get the project path (helps if used on different machines)
+		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
+		System.out.println(temp);
 		return gestion.csvLookup(temp.toString(), OID);
 	}
 	
 	//Search the mib for the corresponding information and replace it by the new values
-	public int setMIBInformation(String OID, String[] values){
-		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("\\src\\MIB.csv");
-		return gestion.csvSetValue(temp.toString(), OID, values, name, user, pass);
+	public int setMIBInformation(String OID, String[] values, String agentName, String ID, String password){
+		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
+		return gestion.csvSetValue(temp.toString(), OID, values, name, ID, password);
 	}
 	
 	public String[] getNext(String searchNextItem){
-		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("\\src\\MIB.csv");
+		StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
 		return gestion.csvGetNext(temp.toString(), searchNextItem);
 	}
 		
@@ -94,6 +93,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 			System.out.println("Registry initiated");
 		} catch (Exception e) {
 			System.out.println("Registry already bound");
+			System.exit(0);
 		}
 		
 		Naming.bind("Agent_connection", new Agent());
@@ -110,11 +110,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-		
-		/*Naming.unbind("Agent_connection");
-		System.out.println("Unbind done");*/
-		
+			}		
 	}
 
 }

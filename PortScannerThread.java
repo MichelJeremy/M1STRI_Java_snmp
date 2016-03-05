@@ -26,7 +26,7 @@ public class PortScannerThread extends Thread {
 	}
 	
 	public PortScannerThread(Gestion _g){
-		//The Gestion object will allow to modify the variable isnide it.
+		//The Gestion object will allow the modification of variables inside it.
 		g = _g;
 		ports = new ArrayList<Integer>(g.getPorts());
 	}

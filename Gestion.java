@@ -13,7 +13,7 @@ public class Gestion {
 	
 	private static  String agentID = "agent1"; // agent's own ID, should become depreciated quickly
 	
-	// We use ArrayLists for its memory access rapidity when periodically looking at the actives ports
+	// We use ArrayLists for its memory access rapidity when periodically looking at the active ports
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
@@ -67,39 +67,43 @@ public class Gestion {
 			String result[] = null;
 			int i=0;
 			StringBuilder tempNewLine;
-			StringBuilder pathOID = new StringBuilder().append(System.getProperty("user.dir")).append("\\src\\exampleOID.csv.bkp");
-			StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("\\src\\secret.csv");
-			boolean isAuthorizedToWrite = false;
-			boolean isconnectionOk = false;
+			StringBuilder pathOID = new StringBuilder().append(System.getProperty("user.dir")).append("/src/exampleOID.csv.bkp");
+			StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("/src/secret.csv");
+			System.out.println(pathOID);
+			boolean isAllowedToWrite = false;
+			boolean doesUserExist = false;
 			
 			//file declarations
 			File temp = new File(pathOID.toString());
 			File orig = new File(csvFilePath);
 			
-			//Test if accreditations are ok to write
+			//Makes sure that user exists and has write permission
 			try{
 				br = new BufferedReader(new FileReader(pathUser.toString()));
-				while ((line = br.readLine()) != null) {
+				while ((line = br.readLine()) != null){
 					result = line.split(",");
 					if (result[0].equals(agent) && result[1].equals(user) && result[2].equals(pass)) {
-						isconnectionOk = true;
+						doesUserExist = true;
 						if(result[3].equals("rw")){
-							isAuthorizedToWrite = true;
+							isAllowedToWrite = true;
 						}
 					}
 				}
 			}catch(Exception e){
 				e.printStackTrace();
 			}
-			
-			if(isAuthorizedToWrite == false){
-				return -3;
-			}
-			
-			if(isconnectionOk == false){
+
+			if(doesUserExist == false){
 				return -2;
 			}
 			
+			if(isAllowedToWrite == false){
+				return -3;
+			}
+			
+
+			
+			//Makes sure that OID exists
 			existenceCheck = csvLookup(csvFilePath, OID);
 			if (existenceCheck[0].equals(OID)) {
 				existence = true;
@@ -107,6 +111,7 @@ public class Gestion {
 				return -1;
 			}
 			
+			// IF both user AND OID checks are OK, modify the file
 			try {
 				temp.createNewFile();
 				br = new BufferedReader(new FileReader(csvFilePath));
