@@ -3,6 +3,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Scanner;
@@ -25,7 +26,19 @@ public class Manager extends Object{
 	
 		
 		RMI_Int_Agent souche=(RMI_Int_Agent) Naming.lookup("rmi://localhost/Agent_connection");
-			
+		
+		//Not sure where to put it
+		try {
+			LocateRegistry.createRegistry(1099);
+			System.out.println("Registry initiated");
+		} catch (Exception e) {
+			System.out.println("Registry already bound");
+			System.exit(0);
+		}
+		
+		//Problem with the extends of the class
+		Naming.bind("Manager_connection", new Manager());
+		
 		
 		//TEST of getting the Active Ports
 		activePorts = new Hashtable<Integer, String>(souche.getActivesPorts());
@@ -151,5 +164,9 @@ public class Manager extends Object{
 			}
 			
 		}
+	}
+	
+	public void trap(String message){
+		System.out.println("Trap: " + message);
 	}
 }

@@ -1,5 +1,4 @@
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.nio.channels.AlreadyBoundException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -8,13 +7,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 
 //Represents an agent that is going to be connected to the manager
 public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
@@ -33,6 +25,9 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	//Class to manage the Arraylists and Hashmaps
 	private static Gestion gestion;
+	
+	//Thread to manage the traps
+	private static TrapThread trapThread;
 	
 	public Agent() throws RemoteException {
 		super();
@@ -73,6 +68,8 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	public static void main(String[] args) throws RemoteException, MalformedURLException, AlreadyBoundException, java.rmi.AlreadyBoundException, NotBoundException  {
 		
 		// ============ CONFIGURATION ============
+		//If modified, you need to modify the MIB.csv
+		
 		ports.add(20); // apache
 		ports.add(80); // http
 		ports.add(443); // https

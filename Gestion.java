@@ -18,15 +18,11 @@ public class Gestion {
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 
 	//Same as the ArrayList case, translation Hashtable will only be updated when access methods used.
-	private static ArrayList<Integer> activePorts = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> activePortsTranslation = new Hashtable<Integer, String>();
 	
 	//Getter and Setter useful for the Thread so it can modify the ArrayList
 	public static ArrayList<Integer> getPorts() {
 		return ports;
-	}
-	public static void setActivePorts(ArrayList<Integer> _activePorts) {
-		activePorts = new ArrayList<Integer>(_activePorts);
 	}
 	
 	
@@ -43,8 +39,14 @@ public class Gestion {
 			//Clear the HashMap every time the methods is called
 			activePortsTranslation.clear();
 			
-			for(i=0; i<activePorts.size(); i++){
-				activePortsTranslation.put(activePorts.get(i), portsTranslation.get(activePorts.get(i)));
+			//For all the ports, look inside the MIB
+			for(i=0; i<ports.size(); i++){
+				StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
+				
+				//If the port is equals to 1, it is active
+				if(csvLookup(temp.toString(), ports.get(i).toString()).equals("1")){
+					activePortsTranslation.put(ports.get(i), portsTranslation.get(ports.get(i)));
+				}
 			}
 			return activePortsTranslation;
 		}
@@ -69,7 +71,7 @@ public class Gestion {
 			StringBuilder tempNewLine;
 			StringBuilder pathOID = new StringBuilder().append(System.getProperty("user.dir")).append("/src/exampleOID.csv.bkp");
 			StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("/src/secret.csv");
-			System.out.println(pathOID);
+			
 			boolean isAllowedToWrite = false;
 			boolean doesUserExist = false;
 			
