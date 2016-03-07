@@ -1,14 +1,21 @@
 import java.io.File;
 import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Scanner;
 
-public class Manager extends Object{
+public class Manager extends UnicastRemoteObject implements RMI_Int_Manager{
+
+	protected Manager() throws RemoteException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	private int hierarchy; // int to know which priority this manager can manage
 	private Hashtable<String, String> hashAgents = new Hashtable<String, String>(); // hash managing agent list (contact list, name -> address)
@@ -27,17 +34,14 @@ public class Manager extends Object{
 		
 		RMI_Int_Agent souche=(RMI_Int_Agent) Naming.lookup("rmi://localhost/Agent_connection");
 		
-		//Not sure where to put it
-		try {
-			LocateRegistry.createRegistry(1099);
-			System.out.println("Registry initiated");
-		} catch (Exception e) {
-			System.out.println("Registry already bound");
-			System.exit(0);
-		}
 		
-		//Problem with the extends of the class
-		Naming.bind("Manager_connection", new Manager());
+		
+		try {
+			Naming.bind("Manager_connection", new Manager());
+		} catch (AlreadyBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 		//TEST of getting the Active Ports

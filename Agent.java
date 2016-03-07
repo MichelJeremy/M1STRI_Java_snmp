@@ -75,12 +75,14 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		ports.add(443); // https
 		ports.add(135); // test
 		ports.add(445); // test2
+		ports.add(61005); //socket
 		
 		portsTranslation.put(20, "Apache");
 		portsTranslation.put(80, "http");
 		portsTranslation.put(443, "https");
 		portsTranslation.put(135, "test");
 		portsTranslation.put(445, "test2");
+		portsTranslation.put(61005, "socket");
 		// =======================================
 		
 		
