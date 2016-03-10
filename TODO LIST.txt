@@ -1,0 +1,19 @@
+QNAP
+-> finir partie 1
+-> faire partie 2
+
+
+
+JAVA
+-> implémenter contacter agent que l'on veut (en fonction du nom de l'agent)
+-> launcher
+-> interface : ajouter possibilité voir ports et configurer traps condition
+-> colorer traps messages et msg normaux, dans un terminal différent
+-> implémenter hiérarchie => utiliser trap levels pour définir la priorité => manager chef s'occupe des traps niveau 1 ("urgents") par exemple
+-> traps : implémenter trap levels
+-> traps doivent analyser la mib => peut être pouvoir définir des conditions de traps facilement définissable
+-> ports : définir OID pr chaque port analysé
+-> traps : implémenter abonnement
+-> mettre à jour le readme.md qui expliquera à quoi sert l'appli, ses fonctionnalités et comment la faire fonctionner
+
+-> interface graphique

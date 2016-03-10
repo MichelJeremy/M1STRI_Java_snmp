@@ -1,0 +1,19 @@
+1 - Manager call agent et envoie infos pour callback (methode say hello)
+ -> agents définis en dur (?)
+2 - Agent peut envoyer des trucs à manager -> le manager doit être prêt à recevoir (?)
+3 - Agent doit pouvoir envoyer des messages sur évènement
+4 - Manager doit pouvoir gérer les priorités
+
+
+SI SYNCHRONE -> utiliser rmi classique (cas rapide)
+SI ASSYNCHRONE -> UTILISER RMI CALLBACKS (cas lent - traps)
+
+
+
+I. agent.welcome
+1 -> requests
+2 -> admin
+2.1 -> ajouter addr agent
+2.2 -> supprimer addr agent
+3 -> exit
+
