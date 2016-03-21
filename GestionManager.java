@@ -3,43 +3,97 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Scanner;
 
-public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manager{
+public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manager, RMI_Int_Manager_Top_Bottom, RMI_Int_Manager_Bottom_Top{
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
+	private static String name;
 	private static String[] agentsArray;
-
+	private static String[] managersArray;
+	private static int hierarchy;
+	
+	//*********************************************
+	//------------ Simple manager -----------------
 	private static RMI_Int_Agent[] soucheAgents;
+	private static RMI_Int_Manager_Bottom_Top soucheBottomTop;
+	
+	//Priority of the trap that should be seen
+	private static int[] priorityAgent;
 	
 	//Hashtable to store Agent's active ports // Enumeration to parse the HashTable
-	private static Hashtable<Integer, String> activePorts = new Hashtable<Integer, String>();
-	private static Enumeration<Integer> activePortsEnum;
-
-	//Priority of the trap that should be seen
-	private static Hashtable<Integer, Integer> priorityAgent;
+		private static Hashtable<Integer, String> activePorts = new Hashtable<Integer, String>();
+		private static Enumeration<Integer> activePortsEnum;
+	
+	//*********************************************
+	//----------- Manager of manager --------------
+	private static RMI_Int_Manager_Top_Bottom[] soucheTopBottom;
+	
+	//Priority of the trap that the hierarchic Manager should see
+	private static int[] priorityAgentForManager;
 	
 	public static String[] getAgentsArray() {
 		return agentsArray;
 	}
 
-	public static int setSoucheAgent(String agent) {
+	public static int getHierarchy() {
+		return hierarchy;
+	}
+
+	public static String getName() {
+		return name;
+	}
+
+	public static String[] getManagersArray() {
+		return managersArray;
+	}
+
+	public static int setSoucheAgent(int number, String agent) {
 		StringBuilder lookup = new StringBuilder().append("rmi://localhost/").append(agent).append("_connection");
 		//Create the Thread to manage the RMI connections.
 		try {
-			Naming.lookup(lookup.toString());
+			soucheAgents[number] = (RMI_Int_Agent) Naming.lookup(lookup.toString());
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// May happen at the beginning of the execution of the program
+			return 0;
+		}
+		return 1;
+	}
+	
+	public static int setSoucheTopManager(String manager) {
+		StringBuilder lookup = new StringBuilder().append("rmi://localhost/Manager_hierarchy_top_connection_").append(manager);
+		//Create the Thread to manage the RMI connections.
+		try {
+			soucheBottomTop = (RMI_Int_Manager_Bottom_Top) Naming.lookup(lookup.toString());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// May happen at the beginning of the execution of the program
+			return 0;
+		}
+		return 1;
+	}
+	
+	public static int setSoucheDownManager(int number, String manager) {
+		StringBuilder lookup = new StringBuilder().append("rmi://localhost/Manager_hierarchy_bottom_connection_").append(manager);
+		//Create the Thread to manage the RMI connections.
+		
+		try {
+			soucheTopBottom[number] = (RMI_Int_Manager_Top_Bottom) Naming.lookup(lookup.toString());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
 			// May happen at the beginning of the execution of the program
@@ -50,44 +104,74 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 	
 	public GestionManager() throws RemoteException{}
 
-	public GestionManager(String[] _agentsArray) throws RemoteException, MalformedURLException {
+	public GestionManager(String _name, String[] _agentsArray, String[] _managersArray, int _hierarchy) throws RemoteException, MalformedURLException {
 		
 		int i = 0;
+		hierarchy = _hierarchy;
+		name = _name;
 		
-		soucheAgents = new RMI_Int_Agent[_agentsArray.length];
-		priorityAgent = new Hashtable<Integer, Integer>();
-		
-		
-		agentsArray = new String[_agentsArray.length];
-		for(i = 0; i < agentsArray.length; i++){
-			agentsArray[i] = _agentsArray[i];
-			priorityAgent.put(i, 0);
+		//If hierarchy higher than 1, then this is a Manager of Managers.
+		if(hierarchy > 1){
+			managersArray = new String[_managersArray.length];
+			for(i = 0; i < managersArray.length; i++){
+				managersArray[i] = _managersArray[i];
+			}
+			
+			//RMI connection to the Thread of the Managers with specific names
+			for(i = 0; i < managersArray.length; i++){
+				StringBuilder bind = new StringBuilder().append("Manager_hierarchy_top_connection_").append(managersArray[i]);
+				try {
+					Naming.bind(bind.toString(), new GestionManager());
+				} catch (AlreadyBoundException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		
-		
-		//RMI connection to the Thread of the agents with specific names
-		for(i = 0; i < agentsArray.length; i++){
-			StringBuilder bind = new StringBuilder().append("Manager_connection_").append(agentsArray[i]);
+		//Else it manage Agents
+		else{
+			soucheAgents = new RMI_Int_Agent[_agentsArray.length];
+			
+			//Initialize with the right length
+			priorityAgent = new int[_agentsArray.length];
+			priorityAgentForManager = new int[_agentsArray.length];
+			
+			agentsArray = new String[_agentsArray.length];
+			for(i = 0; i < agentsArray.length; i++){
+				agentsArray[i] = _agentsArray[i];
+			}
+			
+			//RMI connection to the Thread of the agents with specific names
+			for(i = 0; i < agentsArray.length; i++){
+				StringBuilder bind = new StringBuilder().append("Manager_connection_").append(agentsArray[i]);
+				try {
+					Naming.bind(bind.toString(), new GestionManager());
+				} catch (AlreadyBoundException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			//RMI to connect to the Manager that supervise it
+			StringBuilder bind = new StringBuilder().append("Manager_hierarchy_bottom_connection_").append(name);
 			try {
 				Naming.bind(bind.toString(), new GestionManager());
 			} catch (AlreadyBoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 	
 
-	public static void menu() throws RemoteException{
+	public void menuAgent() throws RemoteException{
 		
 		String[] MibDetail;
 		int i;
 		int retourSet;
 		Scanner reader = new Scanner(System.in);
 		RMI_Int_Agent souche = null;
-		boolean quitmenu = false;
+		boolean quitMenu = false;
+		boolean quitSecondMenu = false;
 		
-		while(true){
+		while(!quitMenu){
 			int choice = 0;
 			
 			System.out.println("Welcome! Please choose an agent to manage");
@@ -96,15 +180,21 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 			for(i = 0; i < agentsArray.length; i++){
 					System.out.println((i+1) + ": " + agentsArray[i]);
 			}
+			
+			System.out.println("0 : Exit");
+			
 			choice = reader.nextInt();
 			
+			if(choice == 0){
+				quitMenu = true;
+			}
 			//Choice will have the value + 1
-			if(choice > 0 && choice <= agentsArray.length){
+			else if(choice > 0 && choice <= agentsArray.length){
 				souche = soucheAgents[choice-1];
 				
-				quitmenu = false;
+				quitSecondMenu = false;
 				
-				while (!quitmenu) {
+				while (!quitSecondMenu) {
 					
 					// interface variables, initiated here to make sure they reset with each iterations
 					String OID = null;
@@ -130,8 +220,10 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 					choice2 = reader.nextInt();
 					switch (choice2) {
 					// case 1: Subscription	
+					//The hierarchy system start at 1, the lowest to 3, the critical.
+					//For exemple, when subscribe to level 2, you will receive the trap of level 2 and 3.
 						case 1: System.out.println("Enter the priority of traps you want to subscribe (1-3): ");
-								priorityAgent.replace(choice-1, reader.nextInt());
+								priorityAgent[choice-1] = reader.nextInt();
 								System.out.println(output);
 								break;
 						
@@ -200,7 +292,7 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 								break;
 						// case 5: Exit		
 						case 5: System.out.println("Back to the Main Menu \n");
-								quitmenu = true;
+								quitSecondMenu = true;
 								break;
 						default: System.out.println("We did not understand your choice. Please try again and make sure your choice is correct.");
 					}
@@ -210,9 +302,8 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 		}
 	}
 	
-	public void trap(String[] message){
+	public void trap(String[] message) throws RemoteException{
 		int i=0;
-		StringBuilder output = new StringBuilder();
 		String agent;
 		boolean found = false;
 		
@@ -225,7 +316,9 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 		}
 		
 		//If the manager has subscribe to the trap of the agent then print it
-		if(priorityAgent.get(i-1) == Integer.parseInt(message[message.length-1])){
+		//The hierarchy system start at 1, the lowest to 3, the critical.
+		//For exemple, when subscribe to level 2, you will receive the trap of level 2 and 3.
+		if(priorityAgent[i-1] <= Integer.parseInt(message[message.length-1])){
 			System.out.print("Trap: " + message[0] + " : " + message[1] + " est maintenant ");
 			if(Integer.parseInt(message[message.length-2]) == 0){
 				System.out.println("inactif");
@@ -233,6 +326,151 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 			else{
 				System.out.println("actif");
 			}
+			
+			if(priorityAgentForManager[i-1] <= Integer.parseInt(message[message.length-1])){
+				try{
+					soucheBottomTop.sendTrap(message);
+				}
+				catch(Exception e){
+					System.out.println(e);
+				}
+			}
 		}
 	}
+	
+	public static void menuManager() throws RemoteException{
+		
+		boolean exitMenu = false;
+		boolean exitSubMenu = false;
+		boolean exitSubSubMenu = false;
+		Scanner reader = new Scanner(System.in);
+		int choice, choice2, choice3;
+		String[] agents;
+		int[] agentPriority, actualPriority;
+		StringBuilder output = new StringBuilder();
+		
+		while(!exitMenu){
+			exitSubMenu = false;
+			System.out.println("Welcome. Choose from the menu below (1-3):\n");
+			System.out.println("1 : Subscribe");
+			System.out.println("2 : Manage Managers");
+			System.out.println("3 : Exit");
+			
+			choice = reader.nextInt();
+			System.out.println(output);
+			
+			switch(choice){
+				case 1:
+					while(!exitSubMenu){
+						exitSubSubMenu = false;
+						System.out.println("Please select the Manager you wish to manage subscription upon");
+						for(int i = 0; i < managersArray.length; i++){
+							System.out.println((i+1) + " : " + managersArray[i]);
+						}
+						System.out.println("0 : Exit");
+						
+						choice2 = reader.nextInt();
+						System.out.println(output);
+						
+						if(choice2 == 0){
+							exitSubMenu = true;
+						}
+						else if(choice2 > 0 && choice2 <= managersArray.length){
+							agents = new String[soucheTopBottom[choice2-1].getAgents().length];
+							agentPriority = new int[agents.length];
+							
+							while(!exitSubSubMenu){
+								//Update the informations about the current status
+								actualPriority = new int[agentPriority.length];
+							
+								for(int i = 0; i < actualPriority.length; i++){
+									agents[i] = soucheTopBottom[choice2-1].getAgents()[i];
+									agentPriority[i] = soucheTopBottom[choice2-1].getPriority()[i];
+									actualPriority[i] = soucheTopBottom[choice2-1].getManagerPriority()[i];
+								}
+								
+								System.out.println("Please select the Agent you wish to set level on");
+								System.out.println("   --Agent-- --Manager level-- --Your current level");
+								for(int i = 0; i < actualPriority.length; i++){
+									System.out.println(i + " : " + agents[i] + "  |  " + agentPriority[i] + "       |             " + actualPriority[i] + "     |" );
+								}
+								System.out.println("0 : Exit");
+								
+								choice3 = reader.nextInt();
+								System.out.println(output);
+								
+								if(choice3 == 0){
+									exitSubSubMenu = true;
+								}
+								else if (choice3 > 0 && choice3 <= actualPriority.length){
+									do{
+										System.out.println("Enter the priority of traps you want to subscribe (1-3): ");
+										choice2 = reader.nextInt();
+										System.out.println(output);
+									}while(choice2 < actualPriority[choice3] || choice3 > 3);	
+								}
+							}
+						}
+					}
+				break;
+				case 2:
+					while(!exitSubMenu){
+						System.out.println("Please select the Manager you wish to manage subscription upon");
+						for(int i = 0; i < managersArray.length; i++){
+							System.out.println((i+1) + " : " + managersArray[i]);
+						}
+						System.out.println("0 : Exit");
+						
+						choice2 = reader.nextInt();
+						System.out.println(output);
+						
+						if(choice2 == 0){
+							exitSubMenu = true;
+						}
+						else if(choice2 > 0 && choice2 <= managersArray.length){
+							soucheTopBottom[choice2-1].menuAgent();
+						}
+					}
+				break;
+				case 3:
+					exitMenu = true;
+				break;
+				default:System.out.println("We did not understand your choice. Please try again and make sure your choice is correct.");
+			}		
+		}
+	}
+
+	@Override
+	public String[] getAgents() throws RemoteException {
+		return agentsArray;
+	}
+
+	@Override
+	public int[] getPriority() throws RemoteException {
+		return priorityAgent;
+	}
+
+	@Override
+	public void setManagerPriority(int[] managerPriority) throws RemoteException {
+		for(int i = 0; i < priorityAgentForManager.length; i++){
+			priorityAgentForManager[i] = managerPriority[i];
+		}
+	}
+	
+	@Override
+	public int[] getManagerPriority() throws RemoteException {
+		return priorityAgentForManager;
+	}
+
+	@Override
+	public void sendTrap(String[] message) throws RemoteException {
+		System.out.print("Trap: " + message[0] + " : " + message[1] + " est maintenant ");
+		if(Integer.parseInt(message[message.length-2]) == 0){
+			System.out.println("inactif");
+		}
+		else{
+			System.out.println("actif");
+		}
+	}
+	
 }

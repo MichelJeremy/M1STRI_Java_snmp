@@ -15,9 +15,9 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	//*************************************************************
 	//---------- Change the name for the different agents ---------
-	private static String name = "Agent2";
-	private static String user = "usertest2";
-	private static String password = "passtest2";
+	private static String name = "Agent1";
+	private static String user = "usertest1";
+	private static String password = "passtest1";
 	
 	//*************************************************************
 	
@@ -30,9 +30,6 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	//Class to manage the Arraylists and Hashmaps
 	private static GestionAgent gestion;
-	
-	//Thread to manage the traps
-	private static TrapThread trapThread;
 	
 	public Agent() throws RemoteException {
 		super();

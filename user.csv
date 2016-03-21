@@ -1,4 +1,6 @@
-Agent1,usertest,passtest,rw
+Agent1,usertest1,passtest1,rw
 Agent2,usertest2,passtest2,rw
-agent1,readonly,pass,r
+Agent3,usertest3,passtest3,rw
+Agent4,usertest4,passtest4,rw
 threadP,threadP,robot,rw
+agentBeurk,readomly,pass,r

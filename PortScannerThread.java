@@ -68,12 +68,12 @@ public class PortScannerThread extends Thread{
 		//Set the active port to 1
 		for(int i=0; i < activePorts.size(); i++){
 			portStatus = "1".split("");
-			g.csvSetValue(temp.toString(), activePorts.get(i).toString(), portStatus , "threadP", "threadP", "robot");
+			GestionAgent.csvSetValue(temp.toString(), activePorts.get(i).toString(), portStatus , "threadP", "threadP", "robot");
 		}
 		//Set the non active ports to 0
 		for(int i=0; i < inactivePorts.size(); i++){
 			portStatus = "0".split("");
-			g.csvSetValue(temp.toString(), inactivePorts.get(i).toString(), portStatus , "threadP", "threadP", "robot");
+			GestionAgent.csvSetValue(temp.toString(), inactivePorts.get(i).toString(), portStatus , "threadP", "threadP", "robot");
 		}
 		
 	}
@@ -91,7 +91,6 @@ public class PortScannerThread extends Thread{
 			try {
 				sleep(500);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -99,10 +98,8 @@ public class PortScannerThread extends Thread{
 				
 				rmi =(RMI_Int_Manager) Naming.lookup(lookup.toString());
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NotBoundException e) {
 				//No errors displayed because it is normal to have some because the Agent is started before the manager
@@ -117,11 +114,8 @@ public class PortScannerThread extends Thread{
 		try {
 			rmi.trap(trap);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 	private void manageChangeState(){

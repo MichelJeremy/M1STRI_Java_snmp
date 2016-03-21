@@ -20,14 +20,26 @@ public class Manager{
 	//*****************************************
 	//-------- Agents Configuration -----------
 	
+	private static final String name = "Manager3";
+	
 	private static final String[] agentsArray = {"Agent1", "Agent2"};
+	
+	private static final int hierarchy = 3;
+	private static final String[] ManagerArray = {"Manager1", "Manager2"};
 	
 	//*****************************************
 	
 	public static void main(String args[]) throws RemoteException, MalformedURLException{
-		GestionManager gestion = new GestionManager(agentsArray);
+		GestionManager gestion = new GestionManager(name, agentsArray, ManagerArray, hierarchy);
 		ConnectionsScannerThread thread = new ConnectionsScannerThread(gestion);
-		gestion.menu();
+		thread.start();
+		
+		if(hierarchy == 1){
+			gestion.menuAgent();
+		}
+		else{
+			gestion.menuManager();
+		}
 	}
 
 }
