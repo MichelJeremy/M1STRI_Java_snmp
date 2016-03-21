@@ -4,6 +4,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -15,12 +16,12 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 	
 	//*************************************************************
 	//---------- Change the name for the different agents ---------
-	private static String name = "Agent1";
-	private static String user = "usertest1";
-	private static String password = "passtest1";
+	private static String name = "Agent3";
+	private static String user = "usertest3";
+	private static String password = "passtest3";
 	
 	//*************************************************************
-	
+	private static Registry reg;
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
 	private static Hashtable<Integer, Integer> portsPriority = new Hashtable<Integer, Integer>();
@@ -106,7 +107,7 @@ public class Agent extends UnicastRemoteObject implements RMI_Int_Agent{
 		
 		// only one agent needs to do this
 		try {
-			LocateRegistry.createRegistry(1099);
+			 reg = LocateRegistry.createRegistry(1099);
 			System.out.println("Registry initiated");
 		} catch (Exception e) {
 			

@@ -9,18 +9,18 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Scanner;
 
-public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manager, RMI_Int_Manager_Top_Bottom, RMI_Int_Manager_Bottom_Top{
+public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manager_Top_Bottom, RMI_Int_Manager, RMI_Int_Manager_Bottom_Top{
 	
 	private static final long serialVersionUID = 1L;
 
 	private static String name;
-	private static String[] agentsArray;
-	private static String[] managersArray;
+	private static String[] agentsArray = new String[10];
+	private static String[] managersArray = new String[10];
 	private static int hierarchy;
 	
 	//*********************************************
 	//------------ Simple manager -----------------
-	private static RMI_Int_Agent[] soucheAgents;
+	private static RMI_Int_Agent[] soucheAgents = new RMI_Int_Agent[2];
 	private static RMI_Int_Manager_Bottom_Top soucheBottomTop;
 	
 	//Priority of the trap that should be seen
@@ -32,7 +32,7 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 	
 	//*********************************************
 	//----------- Manager of manager --------------
-	private static RMI_Int_Manager_Top_Bottom[] soucheTopBottom;
+	private static RMI_Int_Manager_Top_Bottom[] soucheTopBottom = new RMI_Int_Manager_Top_Bottom[2];
 	
 	//Priority of the trap that the hierarchic Manager should see
 	private static int[] priorityAgentForManager;
@@ -54,10 +54,10 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 	}
 
 	public static int setSoucheAgent(int number, String agent) {
-		StringBuilder lookup = new StringBuilder().append("rmi://localhost/").append(agent).append("_connection");
+		StringBuilder look = new StringBuilder().append("rmi://localhost/").append(agent).append("_connection");
 		//Create the Thread to manage the RMI connections.
 		try {
-			soucheAgents[number] = (RMI_Int_Agent) Naming.lookup(lookup.toString());
+			soucheAgents[number] = (RMI_Int_Agent) Naming.lookup(look.toString());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
@@ -70,10 +70,10 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 	}
 	
 	public static int setSoucheTopManager(String manager) {
-		StringBuilder lookup = new StringBuilder().append("rmi://localhost/Manager_hierarchy_top_connection_").append(manager);
+		StringBuilder look = new StringBuilder().append("rmi://localhost/Manager_hierarchy_top_connection_").append(manager);
 		//Create the Thread to manage the RMI connections.
 		try {
-			soucheBottomTop = (RMI_Int_Manager_Bottom_Top) Naming.lookup(lookup.toString());
+			soucheBottomTop = (RMI_Int_Manager_Bottom_Top) Naming.lookup(look.toString());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
@@ -86,11 +86,10 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 	}
 	
 	public static int setSoucheDownManager(int number, String manager) {
-		StringBuilder lookup = new StringBuilder().append("rmi://localhost/Manager_hierarchy_bottom_connection_").append(manager);
+		StringBuilder look = new StringBuilder().append("rmi://localhost/Manager_hierarchy_bottom_connection_").append(manager);
 		//Create the Thread to manage the RMI connections.
-		
 		try {
-			soucheTopBottom[number] = (RMI_Int_Manager_Top_Bottom) Naming.lookup(lookup.toString());
+			soucheTopBottom[number] = (RMI_Int_Manager_Top_Bottom) Naming.lookup(look.toString());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
@@ -152,11 +151,13 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 			
 			//RMI to connect to the Manager that supervise it
 			StringBuilder bind = new StringBuilder().append("Manager_hierarchy_bottom_connection_").append(name);
+			
 			try {
 				Naming.bind(bind.toString(), new GestionManager());
 			} catch (AlreadyBoundException e) {
 				e.printStackTrace();
 			}
+			
 		}
 	}
 	
@@ -344,8 +345,8 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 		boolean exitSubMenu = false;
 		boolean exitSubSubMenu = false;
 		Scanner reader = new Scanner(System.in);
-		int choice, choice2, choice3;
-		String[] agents;
+		int choice, choice2, choice3, choice4;
+		String[] agents = new String[10];
 		int[] agentPriority, actualPriority;
 		StringBuilder output = new StringBuilder();
 		
@@ -376,23 +377,34 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 							exitSubMenu = true;
 						}
 						else if(choice2 > 0 && choice2 <= managersArray.length){
+							System.out.println(soucheTopBottom[choice2-1].getAgents());
+							System.out.println(soucheTopBottom[choice2-1].getAgents().length);
+							
 							agents = new String[soucheTopBottom[choice2-1].getAgents().length];
 							agentPriority = new int[agents.length];
 							
 							while(!exitSubSubMenu){
 								//Update the informations about the current status
 								actualPriority = new int[agentPriority.length];
-							
+								
+								agents = soucheTopBottom[choice2-1].getAgents().clone();
+								agentPriority = soucheTopBottom[choice2-1].getPriority().clone();
+								actualPriority = soucheTopBottom[choice2-1].getManagerPriority().clone();
+								
+								System.out.println(agents[0].toString());
+								System.out.println(agents[1].toString());
+								
+								/*
 								for(int i = 0; i < actualPriority.length; i++){
 									agents[i] = soucheTopBottom[choice2-1].getAgents()[i];
 									agentPriority[i] = soucheTopBottom[choice2-1].getPriority()[i];
 									actualPriority[i] = soucheTopBottom[choice2-1].getManagerPriority()[i];
 								}
-								
+								*/
 								System.out.println("Please select the Agent you wish to set level on");
 								System.out.println("   --Agent-- --Manager level-- --Your current level");
 								for(int i = 0; i < actualPriority.length; i++){
-									System.out.println(i + " : " + agents[i] + "  |  " + agentPriority[i] + "       |             " + actualPriority[i] + "     |" );
+									System.out.println(i+1 + " : " + agents[i] + "  |  " + agentPriority[i] + "       |             " + actualPriority[i] + "     |" );
 								}
 								System.out.println("0 : Exit");
 								
@@ -405,9 +417,11 @@ public class GestionManager extends UnicastRemoteObject implements RMI_Int_Manag
 								else if (choice3 > 0 && choice3 <= actualPriority.length){
 									do{
 										System.out.println("Enter the priority of traps you want to subscribe (1-3): ");
-										choice2 = reader.nextInt();
+										choice4 = reader.nextInt();
 										System.out.println(output);
-									}while(choice2 < actualPriority[choice3] || choice3 > 3);	
+									}while(choice4 < actualPriority[choice3-1] || choice4 > 3);
+									actualPriority[choice2-1] = choice4;
+									soucheTopBottom[choice2-1].setManagerPriority(actualPriority);
 								}
 							}
 						}

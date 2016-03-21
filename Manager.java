@@ -22,9 +22,9 @@ public class Manager{
 	
 	private static final String name = "Manager3";
 	
-	private static final String[] agentsArray = {"Agent1", "Agent2"};
+	private static final String[] agentsArray = {"Agent3", "Agent4"};
 	
-	private static final int hierarchy = 3;
+	private static final int hierarchy = 2;
 	private static final String[] ManagerArray = {"Manager1", "Manager2"};
 	
 	//*****************************************

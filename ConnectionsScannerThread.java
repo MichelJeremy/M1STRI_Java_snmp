@@ -36,10 +36,8 @@ public class ConnectionsScannerThread extends Thread{
 			//Try to connect to the two agents until it is done
 			//V2: Try to connect to the Hierarchical Manager
 			while (!everyConnectionsAgentOk && !connectionsManagerOk){
-				everyConnectionsAgentOk = true;
-				connectionsManagerOk = true;
-				
 				if(!everyConnectionsAgentOk){
+					everyConnectionsAgentOk = true;
 					for(int i = 0; i < numberOfAgents; i++){
 						//We use 0 as default because we do not know the length of the Array and because 0 is automatically set when the initialisation is done, it is easier to do so.
 						if(isAgentConnected[i] != 1){
@@ -50,9 +48,11 @@ public class ConnectionsScannerThread extends Thread{
 				}
 				
 				if(!connectionsManagerOk){
+					connectionsManagerOk = true;
 					//Try to connect to its supervisor
 					if(isManagerConnected != 1){
 						isManagerConnected = GestionManager.setSoucheTopManager(g.getName());
+						connectionsManagerOk = false;
 					}
 				}
 				try {
@@ -85,7 +85,6 @@ public class ConnectionsScannerThread extends Thread{
 					//We use 0 as default because we do not know the length of the Array and because 0 is automatically set when the initialisation is done, it is easier to do so.
 					if(isManagerConnected[i] != 1){
 						isManagerConnected[i] = g.setSoucheDownManager(i, managerArray[i]);
-						System.out.println(managerArray[i] + ": " + isManagerConnected[i]);
 						everyConnectionsOk = false;
 					}
 				}
