@@ -9,13 +9,19 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 // going to process things for Agent
-public class Gestion {
+public class GestionAgent {
 	
-	private static  String agentID = "agent1"; // agent's own ID, should become depreciated quickly
+	private static  String name;
 	
+	public static String getName() {
+		return name;
+	}
+
+
 	// We use ArrayLists for its memory access rapidity when periodically looking at the active ports
 	private static ArrayList<Integer> ports = new ArrayList<Integer>();
 	private static Hashtable<Integer, String> portsTranslation = new Hashtable<Integer, String>();
+	private static Hashtable<Integer, Integer> portsPriority = new Hashtable<Integer, Integer>();
 
 	//Same as the ArrayList case, translation Hashtable will only be updated when access methods used.
 	private static Hashtable<Integer, String> activePortsTranslation = new Hashtable<Integer, String>();
@@ -26,10 +32,12 @@ public class Gestion {
 	}
 	
 	
-	public Gestion(ArrayList<Integer> _ports, Hashtable<Integer, String> _portsTranslation) {
+	public GestionAgent(String _name, ArrayList<Integer> _ports, Hashtable<Integer, String> _portsTranslation, Hashtable<Integer, Integer> _portsPriority) {
 		super();
 		ports = _ports;
 		portsTranslation = _portsTranslation;
+		portsPriority = _portsPriority;
+		name = _name;
 	}
 	
 	//Called from the Manager then the Agent, it is used to get the lists of active ports.
@@ -41,7 +49,7 @@ public class Gestion {
 			
 			//For all the ports, look inside the MIB
 			for(i=0; i<ports.size(); i++){
-				StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
+				StringBuilder temp = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB_").append(name).append(".csv");
 				
 				//If the port is equals to 1, it is active
 				if(csvLookup(temp.toString(), ports.get(i).toString()).equals("1")){
@@ -63,14 +71,15 @@ public class Gestion {
 			BufferedReader br = null;
 			BufferedWriter bw = null;
 			String[] existenceCheck = null;
-			boolean existence = false;
+			boolean existence;
 			String line = "";
 			String newline = "";
 			String result[] = null;
 			int i=0;
 			StringBuilder tempNewLine;
+			
 			StringBuilder pathOID = new StringBuilder().append(System.getProperty("user.dir")).append("/src/exampleOID.csv.bkp");
-			StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("/src/secret.csv");
+			StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("/src/user.csv");
 			
 			boolean isAllowedToWrite = false;
 			boolean doesUserExist = false;
@@ -102,9 +111,7 @@ public class Gestion {
 			if(isAllowedToWrite == false){
 				return -3;
 			}
-			
 
-			
 			//Makes sure that OID exists
 			existenceCheck = csvLookup(csvFilePath, OID);
 			if (existenceCheck[0].equals(OID)) {
@@ -130,8 +137,10 @@ public class Gestion {
 							tempNewLine.append(newValues[i]).append(",");
 							i++;
 						}
+						
+						//Add the priority at the end of the line
+						tempNewLine.append(portsPriority.get(Integer.parseInt(OID)).toString());
 
-						tempNewLine.deleteCharAt(tempNewLine.length()-1);
 						newline = tempNewLine.toString();
 						
 						bw.write(newline);
@@ -262,6 +271,73 @@ public class Gestion {
 			result[0] = "Unknown item";
 		}
 		return result;
-	}	
+	}
+		
+	public int createMib(String agent, String user, String pass) {
+		// vars
+		BufferedReader br = null;
+		BufferedWriter bw = null;
+		String line = "";
+		String result[] = null;
+		
+		StringBuilder pathOID = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB_").append(agent).append(".csv");
+		StringBuilder pathUser = new StringBuilder().append(System.getProperty("user.dir")).append("/src/user.csv");
+		StringBuilder pathOriginal = new StringBuilder().append(System.getProperty("user.dir")).append("/src/MIB.csv");
+		
+		boolean isAllowedToWrite = false;
+		boolean doesUserExist = false;
+		
+		//file declarations
+		File newMib = new File(pathOID.toString());
+		File orig = new File(pathOriginal.toString());
+		
+		//Makes sure that user exists and has write permission
+		try{
+			br = new BufferedReader(new FileReader(pathUser.toString()));
+			while ((line = br.readLine()) != null){
+				result = line.split(",");
+				if (result[0].equals(agent) && result[1].equals(user) && result[2].equals(pass)) {
+					doesUserExist = true;
+					if(result[3].equals("rw")){
+						isAllowedToWrite = true;
+					}
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		if(doesUserExist == false){
+			return -2;
+		}
+		
+		if(isAllowedToWrite == false){
+			return -3;
+		}
+		
+		// IF user OK, copy the file
+		try {
+			newMib.createNewFile();
+			br = new BufferedReader(new FileReader(orig));
+			bw = new BufferedWriter(new FileWriter(newMib));
+			while ((line = br.readLine()) != null) {
+				bw.write(line);
+				bw.newLine();
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				br.close();
+				bw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return 1;
+	}
 	
 }

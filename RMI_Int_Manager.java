@@ -2,5 +2,5 @@
 import java.rmi.RemoteException;
 
 public interface RMI_Int_Manager extends java.rmi.Remote{
-	public void trap(String message) throws RemoteException;
+	public void trap(String[] message) throws RemoteException;
 }

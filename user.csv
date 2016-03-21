@@ -1,0 +1,4 @@
+Agent1,usertest,passtest,rw
+Agent2,usertest2,passtest2,rw
+agent1,readonly,pass,r
+threadP,threadP,robot,rw
